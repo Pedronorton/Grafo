@@ -58,9 +58,12 @@ def matrizDistancias(G,arestas,vertices):#CRIA UM DICIONARIO DE DICIONARIOS COM 
     distancias = {}
     for i in vertices:
         adj = {}
-        for j in matriz[i.id]:
-            x = pesoAresta(i.id,j,arestas)
-            adj[j] = x
+        for j in vertices:
+            if(j.id in matriz[i.id]):
+                x = pesoAresta(i.id, j.id, arestas)
+                adj[j.id] = x
+            else:#CASO NAO TENHA ARESTA DE I->J
+                adj[j.id] = float('inf')
         distancias[i.id] = adj
     return distancias
 
@@ -69,15 +72,18 @@ def matrizPais(G,arestas,vertices):
     pais = {}
     for i in vertices:
         adj = {}
-        for j in matriz[i.id]:
-            adj[j] = i.id
+        for j in vertices:
+            if(j.id in matriz[i.id]):
+                adj[j.id] = i.id
+            else:#CASO NAO FOR PAI DE NINGUEM 
+                adj[j.id] = None
         pais[i.id] = adj
     return pais
 
 def pesoAresta(v,u,arestas):
     for i in arestas:
         if (i.aresta[0] == v and i.aresta[1] == u):
-            return i.peso
+            return float(i.peso)
             break
     return None
 
@@ -120,7 +126,7 @@ def atualizaPesoVertice(v,novoPeso,lista):
 def pesoVertice(v,lista):
     for i in lista:
         if (i.id == v):
-            return i.peso
+            return float(i.peso)
 
 
 def zeraLista(vertices):
