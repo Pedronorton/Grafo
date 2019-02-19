@@ -53,26 +53,33 @@ def definirTipoAresta(listaArestas, arestas, corFilho):
             else:
                 a.tipo = 'cruzada'
 
-def matrizDistancias(G,arestas):#CRIA UM DICIONARIO DE DICIONARIOS COM O PESO DAS ARESTAS
+def matrizDistancias(G,arestas,vertices):#CRIA UM DICIONARIO DE DICIONARIOS COM O PESO DAS ARESTAS
     matriz = matrizAdjacencia(G)
     distancias = {}
-    for i in range(quantidadeVertice):
+    for i in vertices:
         adj = {}
-        for j in matriz[i]:
-            x = pesoAresta(i,j,arestas)
+        for j in matriz[i.id]:
+            x = pesoAresta(i.id,j,arestas)
             adj[j] = x
-        distancias[i] = adj
+        distancias[i.id] = adj
     return distancias
 
+def matrizPais(G,arestas,vertices):
+    matriz = matrizAdjacencia(G)
+    pais = {}
+    for i in vertices:
+        adj = {}
+        for j in matriz[i.id]:
+            adj[j] = i.id
+        pais[i.id] = adj
+    return pais
 
 def pesoAresta(v,u,arestas):
     for i in arestas:
         if (i.aresta[0] == v and i.aresta[1] == u):
             return i.peso
             break
-
-
-
+    return None
 
 def atualizaCor(lista,cor,v0):
     #RECEBE A LISTA DE VERTICES, COR A SER ATUALIZADA E O INDICE DO NÓ
@@ -105,6 +112,17 @@ def atualizaPai(v0,pai,lista):
             v.pai = pai
             break
 
+def atualizaPesoVertice(v,novoPeso,lista):
+    for i in lista:
+        if (i.id == v):
+            i.peso = novoPeso
+
+def pesoVertice(v,lista):
+    for i in lista:
+        if (i.id == v):
+            return i.peso
+
+
 def zeraLista(vertices):
     #COMO PODE USAR TANTO A FUNCAO BFS QUANTO A DFS UTILIZANDO A MESMA LISTA
     #A FUNCAO TEM COMO O OBJETIVO DE REINICIA-LA
@@ -134,6 +152,7 @@ def BFS(vertices,arestas, verticeInicial, G):
         for v in matriz[v0]:#PERCORRE TODOS OS VERTICES ADJACENTES A 'v0'
             aresta = [v0,v]
             if corVertice(v,vertices) == 'B':#SE FOR COR BRANCA, OU SEJA NAO VISITADO ENTAO VISITO
+                atualizaPai(v,v0,vertices)
                 lista.append(v)
                 tam += 1
                 visitados.append(v)
@@ -158,6 +177,7 @@ def DFS(vertices, verticeInicial, G):
     tempo = 0
     for v in listaVisitacao:
         if (corVertice(v, vertices) == 'B'):#SE FOR NAO VISITADO, CHAMA-SE A RECURSAO
+            #atualizaPai(v,verticeInicial,vertices)
             dfsVisit(v,matriz,dfsLista,vertices)
     return dfsLista
 
@@ -166,9 +186,10 @@ def dfsVisit(v, matriz, dfsLista, vertices):
     tempo += 1
     atualizaTempo(v, vertices, 'abertura', tempo)
     atualizaCor(vertices, "C", v)#SETA A COR PARA CINZA (VISITADO)
-    for u in matriz[v]:#PERCORRE OS ADJACENTES AO VERTICE
+    for u in matriz[v]:#PERCORRE OS ADJACENTES AO VERTICE "V"
         if (corVertice(u, vertices) == 'B'):
             dfsLista.append(u)
+            atualizaPai(u,v,vertices)
             atualizaCor(vertices, 'C', u)
             dfsVisit(u, matriz, dfsLista, vertices)
     tempo += 1
